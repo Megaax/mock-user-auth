@@ -1,3 +1,11 @@
 {
-  "users": []
+  "users": [
+    {
+      "id": 60567,
+      "name": "pop",
+      "email": "pop@gmail.com",
+      "password": "123",
+      "imageUrl": "https://almsaeedstudio.com/themes/AdminLTE/dist/img/user2-160x160.jpg"
+    }
+  ]
 }
