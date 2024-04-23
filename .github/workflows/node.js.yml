@@ -1,5 +1,4 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code, and run tests using Node.js version 21.6.2
-name: Node.js CI
+name: Node.js CI with Artifact Upload
 
 on:
   push:
@@ -25,12 +24,8 @@ jobs:
       run: npm test
     - name: Build Docker image
       run: docker build -t demo-mock-auth .
-    - name: Analyze with SonarQube
-      uses: SonarSource/sonarqube-scan-action@7295e71c9583053f5bf40e9d4068a0c974603ec8
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Generate a token on SonarQube, add it to the secrets of this repo with the name SONAR_TOKEN (Settings > Secrets > Actions > add new repository secret)
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}   # add the URL of your instance to the secrets of this repo with the name SONAR_HOST_URL (Settings > Secrets > Actions > add new repository secret)
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
       with:
-        args:
-          -Dsonar.projectKey=
- 
+        name: build-artifact
+        path: .  # You can specify the path to the build artifacts here
