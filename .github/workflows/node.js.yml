@@ -21,3 +21,5 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm test
+    - name: Build Docker image
+      run: docker build -t demo-mock-auth .
