@@ -1,5 +1,5 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, run tests, analyze code with SonarQube, and build a Docker image using the Dockerfile
-name: Node.js CI, SonarQube Analysis, and Docker Build
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code, and run tests using Node.js version 21.6.2
+name: Node.js CI
 
 on:
   push:
@@ -8,33 +8,20 @@ on:
     branches: [ "master" ]
 
 jobs:
-  checkout:
+  build-and-test:
+
     runs-on: ubuntu-latest
+
     steps:
     - uses: actions/checkout@v3
-
-  build:
-    runs-on: ubuntu-latest
-    needs: checkout
-    steps:
     - name: Use Node.js v21.6.2
       uses: actions/setup-node@v3
       with:
         node-version: '21.6.2'
         cache: 'npm'
-
-  test:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
     - name: Install dependencies
       run: npm ci
     - name: Run tests
       run: npm test
-
-
-  build-image:
-    runs-on: ubuntu-latest
-    steps:
     - name: Build Docker image
-      run: docker build -t your-image-name .
+      run: docker build -t demo-mock-auth .
