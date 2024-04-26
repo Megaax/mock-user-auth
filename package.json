@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "scripts/dev.sh",
-    "build": "bash /scripts/build.sh",
+    "build": "bash build.sh",
     "start": "nodemon --exec ./node_modules/.bin/babel-node ./bin/www",
     "lint": "scripts/lint.sh",
     "test": "npx jest __tests__",
