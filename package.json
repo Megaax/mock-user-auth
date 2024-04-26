@@ -6,11 +6,11 @@
   "author": "Thiago Luiz Nunes <thiagoluiz.dev@gmail.com> (https://github.com/thiagoluiznunes)",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://107.23.207.13:8081/repository/nodejs-repo-demo/"
+    "registry": "http://52.86.249.200:8081/repository/nodejs-repo-demo/"
   },
   "scripts": {
     "dev": "scripts/dev.sh",
-    "build": "scripts/build.sh",
+    "build": "cd ./scripts & build.sh",
     "start": "nodemon --exec ./node_modules/.bin/babel-node ./bin/www",
     "lint": "scripts/lint.sh",
     "test": "npx jest __tests__",
