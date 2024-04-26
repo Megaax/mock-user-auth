@@ -1,5 +1,4 @@
 #!/bin/bash
-cd ..
 rm -rf ./dist
 ./node_modules/.bin/babel ./bin --out-dir dist/bin
 ./node_modules/.bin/babel ./components --out-dir dist/components
