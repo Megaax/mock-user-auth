@@ -2,7 +2,7 @@ import supertest from "supertest";
 import app from "../app";
 import { expect } from "chai";
 
-const email = "Ahmed@gmail.com";
+const email = "Mohamed@gmail.com";
 const password = "123";
 const name = "pop";
 
