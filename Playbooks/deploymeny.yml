@@ -7,7 +7,7 @@
         password: "{{ docker_password }}"
 
     - name: Stop and remove any existing container
-      shell: docker rm -f app-1 || true
+      shell: docker rm -f mohamedmagdykhamis/mock-auth || true
 
     - name: Pull the Docker image
       docker_image:
