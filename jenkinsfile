@@ -9,11 +9,8 @@ pipeline {
                 git 'https://github.com/Megaax/mock-user-auth.git'
             }
         }
-        stage('Install Dependencies') {
-            steps {
-                sh 'npm install'
-            }
-        }
+       
+       
         stage('SonarQube Analysis') {
             steps {
                 script {
@@ -27,7 +24,6 @@ pipeline {
         }
         stage('TRIVY SCAN') {
             steps {
-                // sh "trivy fs --security-checks vuln,config /var/lib/jenkins/workspace/pipeline-1 --output trivy-report.html"
                 sh "trivy fs . > trivyfs.txt"
             }
         }
@@ -57,9 +53,7 @@ stage('Build & Push docker image') {
             withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
 
-                sh "docker build -t mock-auth-demo ."
-
-                sh " docker tag mock-auth-demo mohamedmagdykhamis/mock-auth"
+                sh "docker build -t mohamedmagdykhamis/mock-auth ."
 
                 sh "docker push mohamedmagdykhamis/mock-auth"
 
@@ -70,7 +64,7 @@ stage('Build & Push docker image') {
 
         stage("TRIVY Image Scan"){
             steps{
-                sh "trivy mohamedmagdykhamis/demo-auth:latest > trivyimage.txt" 
+                sh "trivy image mohamedmagdykhamis/mock-auth:latest > trivyimage.txt" 
             }
         }
 
@@ -84,13 +78,21 @@ stage('Build & Push docker image') {
 }
         stage('Deploy with Ansible') {
             steps {
-                sh 'ansible-playbook /var/lib/jenkins/playbooks/deployment.yml'
+            withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            sh "ansible-playbook --extra-vars 'docker_username=${DOCKER_USERNAME} docker_password=${DOCKER_PASSWORD}' /var/lib/jenkins/workspace/pipeline-1/Playbooks/deployment.yml"
+        }
             }
         }
     }
     post {
+        failure {
+            script {
+                echo "Pipeline failed! Reverting to the last commit..."
+                sh 'git checkout master'
+                sh 'git reset --hard HEAD^' // Revert to the last commit
+            }
+        }
         always {
-            def pipelineLogs = currentBuild.rawBuild.getLogText()
         emailext attachLog: true,
             subject: "'${currentBuild.result}'",
             body: "Project: ${env.JOB_NAME}<br/>" +
@@ -98,15 +100,6 @@ stage('Build & Push docker image') {
                 "URL: ${env.BUILD_URL}<br/>",
             to: 'mohamedxmagdi@gmail.com',                              
             attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
-            // script {
-            //     def pipelineLogs = currentBuild.rawBuild.getLogText() // Adjust the number to specify the desired number of lines from the log
-            //     emailext (
-            //         to: 'mohamedxmagdi@gmail.com',
-            //         subject: 'Build Success Notification',
-            //         body: "The build was successful. Please review the results.\n\nPipeline Logs:\n${pipelineLogs}",
-            //         attachmentsPattern: 'test_report.txt, trivy-report.html'
-            //     )
-            // }
         }
     }
 
