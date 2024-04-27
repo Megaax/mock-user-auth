@@ -25,7 +25,7 @@ describe("User Registration, Authentication, and Data Retrieval", () => {
         });
 
         test("return 200 status code and success message with token", () => {
-            expect(registrationResponse.statusCode).to.equal(500);
+            expect(registrationResponse.statusCode).to.equal(200);
             expect(registrationResponse.body).to.have.property('message', 'User registered with success');
         });
     });
