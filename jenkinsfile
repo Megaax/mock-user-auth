@@ -1,0 +1,113 @@
+pipeline {
+    agent any
+    tools {
+        nodejs 'node'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                git 'https://github.com/Megaax/mock-user-auth.git'
+            }
+        }
+        stage('Install Dependencies') {
+            steps {
+                sh 'npm install'
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                script {
+                    def scannerHome = tool 'Sonar-Scanner';
+                    withSonarQubeEnv() {
+                        sh "${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=mock-auth "
+                    }
+                }
+            }
+        }
+        stage('TRIVY SCAN') {
+            steps {
+                // sh "trivy fs --security-checks vuln,config /var/lib/jenkins/workspace/pipeline-1 --output trivy-report.html"
+                sh "trivy fs . > trivyfs.txt"
+            }
+        }
+         stage('Build') {
+            steps {
+                sh "npm run build"
+            }
+        }
+     
+        stage('Test') {
+            steps {
+                script {
+                    def testFailed = sh(script: 'npm test', returnStatus: true) != 0
+                    if (testFailed) {
+                        echo "Tests failed! Reverting to the last commit..."
+                        sh 'git checkout master'
+                        sh 'git reset --hard HEAD^' // Revert to the last commit
+                    }
+                    sh "cat /var/lib/jenkins/workspace/pipeline-1/html-report/report.html > test_report.txt"
+
+                }
+            }
+        }
+stage('Build & Push docker image') {
+    steps {
+        script {
+            withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+                sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+
+                sh "docker build -t mock-auth-app ."
+
+                sh " docker tag mock-auth-demo mohamedmagdykhamis/demo-auth"
+
+                sh "docker push mohamedmagdykhamis/demo-auth"
+
+            }
+        }
+    }
+}
+
+        stage("TRIVY Image Scan"){
+            steps{
+                sh "trivy mohamedmagdykhamis/demo-auth:latest > trivyimage.txt" 
+            }
+        }
+
+       stage('Upload Artifacts to Nexus') {
+    steps {
+       withCredentials([file(credentialsId: 'npmrc-demo', variable: 'npmcred')]) {
+           sh 'npm publish --userconfig $npmcred --loglevel verbose'
+
+        }
+    }
+}
+        stage('Deploy with Ansible') {
+            steps {
+                sh 'ansible-playbook /var/lib/jenkins/playbooks/deployment.yml'
+            }
+        }
+    }
+    post {
+        always {
+            def pipelineLogs = currentBuild.rawBuild.getLogText()
+        emailext attachLog: true,
+            subject: "'${currentBuild.result}'",
+            body: "Project: ${env.JOB_NAME}<br/>" +
+                "Build Number: ${env.BUILD_NUMBER}<br/>" +
+                "URL: ${env.BUILD_URL}<br/>",
+            to: 'mohamedxmagdi@gmail.com',                              
+            attachmentsPattern: 'trivyfs.txt,trivyimage.txt'
+            // script {
+            //     def pipelineLogs = currentBuild.rawBuild.getLogText() // Adjust the number to specify the desired number of lines from the log
+            //     emailext (
+            //         to: 'mohamedxmagdi@gmail.com',
+            //         subject: 'Build Success Notification',
+            //         body: "The build was successful. Please review the results.\n\nPipeline Logs:\n${pipelineLogs}",
+            //         attachmentsPattern: 'test_report.txt, trivy-report.html'
+            //     )
+            // }
+        }
+    }
+
+}

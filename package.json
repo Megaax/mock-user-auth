@@ -6,7 +6,7 @@
   "author": "Thiago Luiz Nunes <thiagoluiz.dev@gmail.com> (https://github.com/thiagoluiznunes)",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://52.86.249.200:8081/repository/nodejs-repo-demo/"
+    "registry": "http://34.227.101.68:8081/repository/nodejs-repo-demo/"
   },
   "scripts": {
     "dev": "scripts/dev.sh",
