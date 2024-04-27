@@ -1,0 +1,28 @@
+- hosts: dev
+  remote_user: root
+  tasks:
+    - name: Docker login
+      docker_login:
+        username: "{{ docker_username }}"
+        password: "{{ docker_password }}"
+
+    - name: Stop and remove any existing container
+      shell: docker rm -f app-1 || true
+
+    - name: Pull the Docker image
+      docker_image:
+        name: mohamedmagdykhamis/mock-auth
+        source: pull
+
+    - name: Start the Docker container
+      docker_container:
+        name: app-container
+        image: mohamedmagdykhamis/mock-auth
+        ports:
+          - "3000:3000"
+        state: started
+
+    - name: Run node_exporter in a detached screen session
+      shell: "nohup ./node_exporter --log.level=\"debug\" > node_exporter.log 2>&1 &"
+      args:
+        chdir: "/home/ubuntu/node_exporter-1.8.0.linux-amd64"

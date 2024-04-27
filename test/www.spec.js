@@ -58,15 +58,6 @@ describe('WWW server', () => {
         expect(err.code).to.equal('Default');
       }
     });
-    // it('It should catch EACCES error', () => {
-    //   try {
-    //     expect(onError({ syscall: 'listen', code: 'EACCES' })).to.throw();
-    //   } catch (err) {}
-    // });
-    // it('It should catch EADDRINUSE error', () => {
-    //   try {
-    //     expect(onError({ syscall: 'listen', code: 'EADDRINUSE' })).to.throw();
-    //   } catch (err) {}
-    // });
+
   });
 });

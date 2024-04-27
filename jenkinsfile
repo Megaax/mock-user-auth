@@ -57,11 +57,11 @@ stage('Build & Push docker image') {
             withCredentials([usernamePassword(credentialsId: 'docker-cred', usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
                 sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
 
-                sh "docker build -t mock-auth-app ."
+                sh "docker build -t mock-auth-demo ."
 
-                sh " docker tag mock-auth-demo mohamedmagdykhamis/demo-auth"
+                sh " docker tag mock-auth-demo mohamedmagdykhamis/mock-auth"
 
-                sh "docker push mohamedmagdykhamis/demo-auth"
+                sh "docker push mohamedmagdykhamis/mock-auth"
 
             }
         }
